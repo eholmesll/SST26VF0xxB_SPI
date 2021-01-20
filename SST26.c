@@ -1,5 +1,5 @@
 #include "spi.h"
-#include "stm32_spi_flash.h"
+#include "SST26.h"
 
 #define sFLASH_CS_LOW()       HAL_GPIO_WritePin(FLASH_CS_GPIO_Port, FLASH_CS_Pin, GPIO_PIN_RESET)
 #define sFLASH_CS_HIGH()      HAL_GPIO_WritePin(FLASH_CS_GPIO_Port, FLASH_CS_Pin, GPIO_PIN_SET)
