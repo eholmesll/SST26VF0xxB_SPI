@@ -17,7 +17,8 @@
 #define    FLASH_CMD_WRSCUR    0x2F    //WRSCUR (Write Security Register)
 #define    FLASH_CMD_RDSCUR    0x2B    //RDSCUR (Read Security Register)
 #define    FLASH_CMD_RDCR      0x15    //RDCR (Read Configuration Register)
-
+#define	   FLASH_CMD_RBPR	   0x72    //RBPR (Read Block-Protection Register)
+#define    FLASH_CMD_ULBPR	   0x98	   //ULBPR (Global Block-Protection Unlock)
 /* READ comands */
 #define    FLASH_CMD_READ        0x03    //READ (1 x I/O)
 #define    FLASH_CMD_2READ       0xBB    //2READ (2 x I/O)
@@ -95,7 +96,9 @@
 #define    sFLASH_MX25L6433F_RESID0			0xc216
 #define    sFLASH_MX25L6433F_RESID1			0x16c2
 
-
+#define		sFLASH_SST26_ID			0xBF
+#define 	sFLASH_SST26_DevID		0x41
+#define 	sFLASH_SST26_DevType	0x26
 
 /*
  * Flash memory organization
@@ -107,12 +110,15 @@
 /* High layer functions */
 //void sFLASH_DeInit(void);
 //void sFLASH_Init(void);
+void sFLASH_ReadBlockProtection(uint8_t* BlockRegData);
+void sFLASH_GlobalBlockProtectionUnlock(void);
+
 void sFLASH_EraseSector(uint32_t SectorAddr);
 void sFLASH_EraseChip(void);
 void sFLASH_WritePage(uint8_t* pBuffer, uint32_t WriteAddr, uint32_t NumByteToWrite);
 void sFLASH_WriteBuffer(uint8_t* pBuffer, uint32_t WriteAddr, uint32_t NumByteToWrite);
 void sFLASH_ReadBuffer(uint8_t* pBuffer, uint32_t ReadAddr, uint32_t NumByteToRead);
-uint32_t sFLASH_ReadID(void);
+uint8_t sFLASH_ReadID(void);
 //void sFLASH_StartReadSequence(uint32_t ReadAddr);
 
 #endif /* _STM32_SPI_FLASH_H_ */

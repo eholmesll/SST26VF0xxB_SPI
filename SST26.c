@@ -1,4 +1,5 @@
 #include "spi.h"
+#include "string.h"
 #include "SST26.h"
 
 #define sFLASH_CS_LOW()       HAL_GPIO_WritePin(FLASH_CS_GPIO_Port, FLASH_CS_Pin, GPIO_PIN_RESET)
@@ -9,6 +10,64 @@ uint8_t sFLASH_SendByte(uint8_t byte);
 uint16_t sFLASH_SendHalfWord(uint16_t HalfWord);
 void sFLASH_WriteEnable(void);
 void sFLASH_WaitForWriteEnd(void);
+
+
+
+
+/**
+  * @brief  Reads Block protection.
+  * @param  BlockRegData array
+  * @retval None
+  */
+void sFLASH_ReadBlockProtection(uint8_t* BlockRegData)
+{
+	uint8_t txData[1];
+	uint8_t rxData[6] = { 0 };
+
+	txData[0] = FLASH_CMD_RBPR;
+
+	/* Select the FLASH: Chip Select low */
+	sFLASH_CS_LOW();
+
+	/* Send "RDID " instruction */
+	HAL_SPI_Transmit(&hspi2, txData, sizeof(txData), HAL_MAX_DELAY);
+	/* Receive ID value */
+	HAL_SPI_Receive(&hspi2, rxData, sizeof(rxData), HAL_MAX_DELAY);
+
+	/* Deselect the FLASH: Chip Select high */
+	sFLASH_CS_HIGH();
+
+	memcpy(BlockRegData, rxData, sizeof(rxData));
+
+}
+
+/**
+  * @brief  Send Global Block Register Unlock command
+  * @param  None
+  * @retval None
+  */
+void sFLASH_GlobalBlockProtectionUnlock(void)
+{
+	uint8_t txData[1];
+
+	txData[0] = FLASH_CMD_ULBPR;
+
+	/* Send write enable instruction */
+	sFLASH_WriteEnable();
+
+	/* Select the FLASH: Chip Select low */
+	sFLASH_CS_LOW();
+
+	/* Send Bulk Erase instruction  */
+	HAL_SPI_Transmit(&hspi2, txData, sizeof(txData), HAL_MAX_DELAY);
+
+	/* Deselect the FLASH: Chip Select high */
+	sFLASH_CS_HIGH();
+
+}
+
+
+
 
 
 /**
@@ -230,7 +289,7 @@ void sFLASH_WriteBuffer(uint8_t* pBuffer, uint32_t WriteAddr, uint32_t NumByteTo
   * @param  None
   * @retval FLASH identification
   */
-uint32_t sFLASH_ReadID(void)
+uint8_t sFLASH_ReadID(void)
 {
 	uint8_t txData[1];
 	uint8_t rxData[3];
@@ -248,7 +307,12 @@ uint32_t sFLASH_ReadID(void)
 	/* Deselect the FLASH: Chip Select high */
 	sFLASH_CS_HIGH();
 
-	return (rxData[0] << 16) | (rxData[1] << 8) | rxData[2];
+	if ((rxData[0] == sFLASH_SST26_ID) && (rxData[1] == sFLASH_SST26_DevType) && (rxData[2] == sFLASH_SST26_DevID)) {
+		return 1;
+	}
+
+	return 0;
+	//return (rxData[0] << 16) | (rxData[1] << 8) | rxData[2];
 }
 
 /**
